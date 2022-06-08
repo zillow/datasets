@@ -37,17 +37,14 @@ def get_aws_session(role_arn: str = None, profile_name: str = None) -> Session:
         role_arn=role_arn,
     )
 
-    # Retrieve crednetials of the assumed role and auto-refresh
-    credentials = DeferredRefreshableCredentials(
-        method="assume-role", refresh_using=fetcher.fetch_credentials
+    # Create new session with assumed role and auto-refresh
+    botocore_session = Session()
+    botocore_session._credentials = DeferredRefreshableCredentials(
+        method="assume-role",
+        refresh_using=fetcher.fetch_credentials,
     )
 
-    return boto3.Session(
-        aws_access_key_id=credentials.access_key,
-        aws_secret_access_key=credentials.secret_key,
-        aws_session_token=credentials.token,
-        region_name=region_name,
-    )
+    return boto3.Session(botocore_session=botocore_session, region_name=region_name)
 
 
 def get_aws_client(role_arn: str, service: str):
