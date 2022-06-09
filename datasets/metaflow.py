@@ -91,11 +91,13 @@ class _DatasetParamsDecoder(json.JSONDecoder):
         ):
             return {DatasetPlugin._get_context(k): v for k, v in obj.items()}
         else:
-            mode = obj.get("mode")
-            if mode:
-                obj["mode"] = mode if isinstance(obj, Mode) else Mode[mode]
+            params = {k: obj[k] for k in _DatasetParams().__dict__.keys() if k in obj}
 
-            return _DatasetParams(**obj)
+            mode = params.get("mode")
+            if mode:
+                params["mode"] = mode if isinstance(mode, Mode) else Mode[mode]
+
+            return _DatasetParams(**params)
 
 
 _fallback = json.JSONEncoder().default

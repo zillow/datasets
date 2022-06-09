@@ -1,5 +1,6 @@
 import json
 
+from datasets import Dataset
 from datasets.context import Context
 from datasets.dataset_plugin import StorageOptions
 from datasets.metaflow import (
@@ -9,7 +10,25 @@ from datasets.metaflow import (
 )
 from datasets.mode import Mode
 from datasets.plugins.batch.batch_base_plugin import BatchOptions
+from datasets.plugins.batch.batch_dataset import BatchDataset
 from datasets.plugins.batch.hive_dataset import HiveOptions
+
+
+def test_dataset_dumps_load():
+    dataset = Dataset(
+        name="Example",
+        logical_key="my_key",
+        mode=Mode.READ_WRITE,
+        options=BatchOptions(partition_by="foo"),
+    )
+
+    json_value = json.dumps(dataset)
+    dataset2 = _DatasetTypeClass().convert(json_value, None, None)
+
+    assert dataset2.options.partition_by == "foo"
+    assert dataset2.mode == Mode.READ_WRITE
+    assert isinstance(dataset2, BatchDataset)
+    assert dataset == dataset2
 
 
 def test_dataset_type_class():
